@@ -1,0 +1,39 @@
+# an example docker-compose file for running the container
+
+version: '3.9'
+
+services:
+  fluentd:
+    image: jackhrt/fluentd-docker:${TAG:-latest-rockylinux}
+    container_name: fluentd
+    read_only: true
+    restart: on-failure:5
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    environment:
+      - DEFAULT_CONF=/run/secrets/td-agent.conf
+    volumes:
+      - logs:/var/log/td-agent/
+      - tmp:/tmp/
+    secrets:
+      - source: fluentd_conf
+        target: td-agent.conf
+    security_opt:
+      - no-new-privileges:true
+
+secrets:
+  # secrets are mounted in a container in /run/secrets/
+  fluentd_conf:
+    file: ../td-agent.conf
+
+volumes:
+  logs:
+    name: logs
+
+  tmp:
+    name: tmp
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "mode=1777,rw"
