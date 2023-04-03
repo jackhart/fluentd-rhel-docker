@@ -25,7 +25,7 @@ services:
 secrets:
   # secrets are mounted in a container in /run/secrets/
   fluentd_conf:
-    file: ../td-agent.conf
+    file: td-agent.conf
 
 volumes:
   logs:

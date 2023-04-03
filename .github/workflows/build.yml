@@ -1,6 +1,7 @@
 # Reusable workflow that builds and pushes/loads images to Nexus
 name: Build and Push
 on:
+  # TODO - a better approach than this
   workflow_dispatch:
     inputs:
       major:
@@ -15,12 +16,24 @@ on:
         description: Patch version
         required: true
         type: string
+      os:
+        description: The OS of the base image
+        required: true
+        type: choice
+        options:
+        - ubi8
+        - rockylinux
+      is_latest:
+        description: If image should be tagged as latest
+        default: false
+        type: boolean
 
-  secrets:
-    DOCKERHUB_USERNAME:
-      required: true
-    DOCKERHUB_TOKEN:
-      required: true
+# used by the bake file
+env:
+  MAJOR_VERSION: ${{ inputs.major }}
+  MINOR_VERSION: ${{ inputs.minor }}
+  PATCH_VERSION: ${{ inputs.patch }}
+  OS: ${{ inputs.os }}
 
 jobs:
   docker:
@@ -36,15 +49,17 @@ jobs:
         with:
           images: |
             jackhrt/fluentd-docker
-          # TODO - standard tags
           tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{inputs.major}}
-            type=semver,pattern={{inputs.major}}.{{inputs.minor}}
-            type=semver,pattern={{inputs.major}}
+            type=raw,value=latest-${{ inputs.os }},enable=${{ inputs.is_latest }}
+            type=raw,value=v${{ inputs.major }}-${{ inputs.os }}
+            type=raw,value=v${{ inputs.major }}.${{ inputs.minor }}-${{ inputs.os }}
+            type=raw,value=v${{ inputs.major }}.${{ inputs.minor }}.${{ inputs.patch }}-${{ inputs.os }}
             type=sha
+          labels: |
+            com.jackhrt.image.title=Fluentd
+            com.jackhrt.image.authors=Jack Hart, jackhart0508@gmail.com
+            com.jackhrt.image.url=https://hub.docker.com/r/jackhrt/fluentd-docker
+            com.jackhrt.image.source=https://github.com/jackhart/fluentd-rhel-docker
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -55,17 +70,26 @@ jobs:
         name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: jackhrt
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       # TODO - test before pushing
-      # but how to test a different platform than the host
-      -
-        name: Build and push
-        uses: docker/build-push-action@v4
+      - name: Build and Push amd64
+        uses: docker/bake-action@v2
         with:
-          context: .
           push: true
-          tags: jackhrt/fluentd-docker:tagname
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=jackhrt/fluentd-docker:buildcache
-          cache-to: type=registry,ref=jackhrt/fluentd-docker:buildcache,mode=max
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+          targets: fluentd
+          set: |
+            *.platform=linux/amd64
+      - name: Build and Push amd64
+        uses: docker/bake-action@v2
+        with:
+          push: true
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+          targets: fluentd
+          set: |
+            *.platform=linux/arm64
