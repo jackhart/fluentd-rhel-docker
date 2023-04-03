@@ -9,6 +9,8 @@ group "default" {
   targets = ["fluentd"]
 }
 
+target "docker-metadata-action" {}
+
 target "fluentd" {
     context = "."
     target = OS
@@ -35,7 +37,6 @@ target "fluentd-mqtt" {
     ]
 }
 
-
 target "fluentd-prod" {
-    inherits = ["fluentd"]
+    inherits = ["fluentd", "docker-metadata-action"]
 }
