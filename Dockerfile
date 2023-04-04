@@ -12,9 +12,9 @@ COPY --from=rockylinux:8.7-minimal / /minimal/
 RUN dnf update -y --nodocs --releasever 8 --installroot /minimal/ && \
     dnf upgrade -y --nodocs --releasever 8 --installroot /minimal/
 
-COPY ./td.repo /minimal/etc/yum.repos.d/td.repo
+COPY ./td*.repo /minimal/etc/yum.repos.d/
 RUN rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent && \
-    dnf install td-agent-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-1.el8 libxcrypt -y \
+    dnf install td-agent-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-*.el8 libxcrypt -y \
         --nodocs --releasever 8 --installroot /minimal/ && \
     dnf clean all --installroot /minimal/ && \
     adduser -M -u 77 td-agent

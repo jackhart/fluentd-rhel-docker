@@ -35,6 +35,12 @@ target "fluentd-mqtt" {
     ]
 }
 
+# for debugging
+target builder {
+    inherits = ["fluentd"]
+    tags = ["builder"]
+    target = "builder"
+}
 
 # FIXME - can't use the bake file in action b/c of issue cited above
 target "docker-metadata-action" {}
