@@ -1,0 +1,20 @@
+# Reusable workflow that builds and pushes/loads images to Nexus
+name: Update DockerHub Description
+on:
+  # TODO - a better approach than this
+  workflow_dispatch:
+
+jobs:
+  dockerhub-description:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: jackhrt
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: jackhrt/fluentd-docker
