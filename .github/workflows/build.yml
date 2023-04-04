@@ -24,7 +24,15 @@ on:
         - ubi8
         - rockylinux
       is_latest:
-        description: latest
+        description: latest tag
+        default: false
+        type: boolean
+      latest_major:
+        description: latest major version
+        default: false
+        type: boolean
+      latest_minor:
+        description: latest minor version
         default: false
         type: boolean
 
@@ -51,10 +59,9 @@ jobs:
             jackhrt/fluentd-docker
           tags: |
             type=raw,value=latest-${{ inputs.os }},enable=${{ inputs.is_latest }}
-            type=raw,value=v${{ inputs.major }}-${{ inputs.os }}
-            type=raw,value=v${{ inputs.major }}.${{ inputs.minor }}-${{ inputs.os }}
+            type=raw,value=v${{ inputs.major }}-${{ inputs.os }},enable=${{ inputs.latest_major }}
+            type=raw,value=v${{ inputs.major }}.${{ inputs.minor }}-${{ inputs.os }},enable=${{ inputs.latest_minor }}
             type=raw,value=v${{ inputs.major }}.${{ inputs.minor }}.${{ inputs.patch }}-${{ inputs.os }}
-            type=sha
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -85,6 +92,6 @@ jobs:
           files: |
             ./docker-bake.hcl
             ${{ steps.meta.outputs.bake-file }}
-          targets: fluentd
+          targets: fluentd-prod
           set: |
             *.platform=linux/arm64

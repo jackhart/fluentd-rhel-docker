@@ -62,5 +62,4 @@ docker compose up
 
 ## Version Updates
 
-TODO - finish GitHub actions work.
-TODO - add images to hub.
+Images are tagged by the version of fluentd and base image OS.  This is done using the GitHub Actions workflow.  The workflow currently must be manually triggered by myself.
