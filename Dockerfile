@@ -12,7 +12,8 @@ COPY --from=rockylinux:8.7-minimal / /minimal/
 RUN dnf update -y --nodocs --releasever 8 --installroot /minimal/ && \
     dnf upgrade -y --nodocs --releasever 8 --installroot /minimal/
 
-COPY ./td*.repo /minimal/etc/yum.repos.d/
+# TODO - v3 does not have an arm repo, breaks multi-arch build
+COPY ./td.repo /minimal/etc/yum.repos.d/td.repo
 RUN rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent && \
     dnf install td-agent-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-*.el8 libxcrypt -y \
         --nodocs --releasever 8 --installroot /minimal/ && \
