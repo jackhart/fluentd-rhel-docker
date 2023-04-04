@@ -9,8 +9,6 @@ group "default" {
   targets = ["fluentd"]
 }
 
-target "docker-metadata-action" {}
-
 target "fluentd" {
     context = "."
     target = OS
@@ -36,6 +34,10 @@ target "fluentd-mqtt" {
         "jackhrt/fluentd-mqtt-docker:v${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-${OS}"
     ]
 }
+
+
+# FIXME - can't use the bake file in action b/c of issue cited above
+target "docker-metadata-action" {}
 
 target "fluentd-prod" {
     inherits = ["fluentd", "docker-metadata-action"]

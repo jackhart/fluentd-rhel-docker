@@ -75,23 +75,24 @@ jobs:
           username: jackhrt
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       # TODO - test before pushing
-      - name: Build and Push amd64
-        uses: docker/bake-action@v2
+      -
+        name: Build and push
+        uses: docker/build-push-action@v4
         with:
+          context: .
           push: true
-          files: |
-            ./docker-bake.hcl
-            ${{ steps.meta.outputs.bake-file }}
-          targets: fluentd-prod
-          set: |
-            *.platform=linux/amd64
-      - name: Build and Push arm64
-        uses: docker/bake-action@v2
-        with:
-          push: true
-          files: |
-            ./docker-bake.hcl
-            ${{ steps.meta.outputs.bake-file }}
-          targets: fluentd-prod
-          set: |
-            *.platform=linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          target: ${{ inputs.os }}
+      # FIXME - can't support multi-arch images this way b/c https://github.com/docker/buildx/issues/1522
+      #      - name: Build and Push arm64
+      #        uses: docker/bake-action@v2
+      #        with:
+      #          push: true
+      #          files: |
+      #            ./docker-bake.hcl
+      #            ${{ steps.meta.outputs.bake-file }}
+      #          targets: fluentd-prod
+      #          set: |
+      #            *.platform=linux/arm64
