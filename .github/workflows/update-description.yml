@@ -16,5 +16,5 @@ jobs:
         uses: peter-evans/dockerhub-description@v3
         with:
           username: jackhrt
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: jackhrt/fluentd-docker
